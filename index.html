@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jules Interactive Showcase & Arcade</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background: #0B0F19;
+      color: #E2E8F0;
+      font-family: 'Outfit', sans-serif;
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    canvas#particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: auto;
+    }
+    .container {
+      position: relative;
+      z-index: 10;
+      max-width: 1000px;
+      width: 90%;
+      margin: 40px auto;
+      text-align: center;
+    }
+    header {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 40px 30px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(99, 102, 241, 0.2);
+      margin-bottom: 30px;
+      animation: fadeIn 1s ease-out;
+    }
+    h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 3.2rem;
+      background: linear-gradient(135deg, #6366F1, #A855F7, #EC4899);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 15px;
+      letter-spacing: -1px;
+    }
+    p.subtitle {
+      font-size: 1.2rem;
+      color: #94A3B8;
+      max-width: 650px;
+      margin: 0 auto 25px;
+      line-height: 1.6;
+    }
+    .badge-container {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .badge {
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      color: #818CF8;
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    /* Game Section */
+    .game-card {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 30px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      margin-bottom: 40px;
+    }
+    .game-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding: 0 10px;
+    }
+    .score-board {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #38BDF8;
+    }
+    canvas#gameCanvas {
+      background: #020617;
+      border-radius: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+      cursor: crosshair;
+      display: block;
+      margin: 0 auto;
+      max-width: 100%;
+    }
+    .controls-panel {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+    }
+    .btn {
+      background: linear-gradient(135deg, #6366F1, #8B5CF6);
+      color: white;
+      border: none;
+      padding: 12px 28px;
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: 'Outfit', sans-serif;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6);
+    }
+    .btn:active {
+      transform: translateY(0);
+    }
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: none;
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+      box-shadow: none;
+    }
+
+    footer {
+      margin-top: auto;
+      padding: 20px;
+      color: #64748B;
+      font-size: 0.9rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="particles"></canvas>
+
+  <div class="container">
+    <header>
+      <h1>Jules Interactive AI Showcase</h1>
+      <p class="subtitle">Bem-vindo ao teste interativo! Desenvolvido do zero para demonstrar automação em tempo real, física de partículas e minijogos interativos.</p>
+      <div class="badge-container">
+        <span class="badge">✨ Real-time Physics</span>
+        <span class="badge">🎮 Cyber Arcade</span>
+        <span class="badge">🤖 Built by Jules AI</span>
+      </div>
+    </header>
+
+    <div class="game-card">
+      <div class="game-header">
+        <h2 style="font-size: 1.5rem; font-family: 'Space Grotesk'; color: #F8FAFC;">Cyber Energy Catcher</h2>
+        <div class="score-board">Pontuação: <span id="score">0</span> | Vidas: <span id="lives">3</span></div>
+      </div>
+      <canvas id="gameCanvas" width="800" height="400"></canvas>
+      <div class="controls-panel">
+        <button class="btn" id="startBtn">Iniciar Jogo</button>
+        <button class="btn btn-secondary" id="pulseBtn">Onda de Choque Interativa</button>
+      </div>
+    </div>
+
+    <footer>
+      Criado por Jules • Teste de Integração e Automação
+    </footer>
+  </div>
+
+  <script>
+    // Particle Background System
+    const pCanvas = document.getElementById('particles');
+    const pCtx = pCanvas.getContext('2d');
+    let pWidth, pHeight;
+
+    function resizeParticles() {
+      pWidth = pCanvas.width = window.innerWidth;
+      pHeight = pCanvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeParticles);
+    resizeParticles();
+
+    const particles = [];
+    const numParticles = 80;
+
+    class Particle {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = Math.random() * pWidth;
+        this.y = Math.random() * pHeight;
+        this.vx = (Math.random() - 0.5) * 1.5;
+        this.vy = (Math.random() - 0.5) * 1.5;
+        this.radius = Math.random() * 2 + 1;
+        this.alpha = Math.random() * 0.5 + 0.2;
+        this.color = ['#6366F1', '#A855F7', '#EC4899', '#38BDF8'][Math.floor(Math.random() * 4)];
+      }
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        if (this.x < 0 || this.x > pWidth) this.vx *= -1;
+        if (this.y < 0 || this.y > pHeight) this.vy *= -1;
+      }
+      draw() {
+        pCtx.save();
+        pCtx.globalAlpha = this.alpha;
+        pCtx.beginPath();
+        pCtx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        pCtx.fillStyle = this.color;
+        pCtx.shadowBlur = 10;
+        pCtx.shadowColor = this.color;
+        pCtx.fill();
+        pCtx.restore();
+      }
+    }
+
+    for (let i = 0; i < numParticles; i++) {
+      particles.push(new Particle());
+    }
+
+    // Connect particles
+    function animateParticles() {
+      pCtx.clearRect(0, 0, pWidth, pHeight);
+      particles.forEach(p => {
+        p.update();
+        p.draw();
+      });
+
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 120) {
+            pCtx.save();
+            pCtx.globalAlpha = (1 - dist / 120) * 0.2;
+            pCtx.strokeStyle = '#818CF8';
+            pCtx.lineWidth = 0.8;
+            pCtx.beginPath();
+            pCtx.moveTo(particles[i].x, particles[i].y);
+            pCtx.lineTo(particles[j].x, particles[j].y);
+            pCtx.stroke();
+            pCtx.restore();
+          }
+        }
+      }
+      requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
+
+    // Game Logic
+    const gCanvas = document.getElementById('gameCanvas');
+    const gCtx = gCanvas.getContext('2d');
+    let score = 0;
+    let lives = 3;
+    let gameRunning = false;
+    let gameLoopId = null;
+
+    const player = {
+      x: gCanvas.width / 2,
+      y: gCanvas.height - 30,
+      width: 100,
+      height: 16,
+      speed: 8,
+      color: '#38BDF8'
+    };
+
+    let targets = [];
+
+    function spawnTarget() {
+      targets.push({
+        x: Math.random() * (gCanvas.width - 30) + 15,
+        y: 0,
+        radius: 12,
+        speed: Math.random() * 2 + 2,
+        color: ['#10B981', '#F59E0B', '#EC4899', '#8B5CF6'][Math.floor(Math.random() * 4)],
+        points: 10
+      });
+    }
+
+    // Controls
+    let mouseX = gCanvas.width / 2;
+    gCanvas.addEventListener('mousemove', (e) => {
+      const rect = gCanvas.getBoundingClientRect();
+      mouseX = e.clientX - rect.left;
+    });
+
+    document.getElementById('startBtn').addEventListener('click', () => {
+      score = 0;
+      lives = 3;
+      targets = [];
+      gameRunning = true;
+      document.getElementById('score').innerText = score;
+      document.getElementById('lives').innerText = lives;
+      document.getElementById('startBtn').innerText = 'Reiniciar Jogo';
+    });
+
+    document.getElementById('pulseBtn').addEventListener('click', () => {
+      // Trigger a shockwave effect in particle canvas
+      particles.forEach(p => {
+        p.vx *= 3;
+        p.vy *= 3;
+      });
+      setTimeout(() => {
+        particles.forEach(p => {
+          p.vx /= 3;
+          p.vy /= 3;
+        });
+      }, 1000);
+    });
+
+    function updateGame() {
+      gCtx.clearRect(0, 0, gCanvas.width, gCanvas.height);
+
+      // Draw Grid background
+      gCtx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+      gCtx.lineWidth = 1;
+      for (let x = 0; x < gCanvas.width; x += 40) {
+        gCtx.beginPath();
+        gCtx.moveTo(x, 0);
+        gCtx.lineTo(x, gCanvas.height);
+        gCtx.stroke();
+      }
+      for (let y = 0; y < gCanvas.height; y += 40) {
+        gCtx.beginPath();
+        gCtx.moveTo(0, y);
+        gCtx.lineTo(gCanvas.width, y);
+        gCtx.stroke();
+      }
+
+      if (gameRunning) {
+        // Move paddle towards mouse
+        player.x += (mouseX - player.x) * 0.2;
+        if (player.x - player.width / 2 < 0) player.x = player.width / 2;
+        if (player.x + player.width / 2 > gCanvas.width) player.x = gCanvas.width - player.width / 2;
+
+        // Draw Player Paddle
+        gCtx.save();
+        gCtx.fillStyle = player.color;
+        gCtx.shadowBlur = 15;
+        gCtx.shadowColor = player.color;
+        gCtx.beginPath();
+        gCtx.roundRect(player.x - player.width / 2, player.y, player.width, player.height, 8);
+        gCtx.fill();
+        gCtx.restore();
+
+        // Spawn targets
+        if (Math.random() < 0.04) {
+          spawnTarget();
+        }
+
+        // Update targets
+        for (let i = targets.length - 1; i >= 0; i--) {
+          const t = targets[i];
+          t.y += t.speed;
+
+          // Draw target
+          gCtx.save();
+          gCtx.fillStyle = t.color;
+          gCtx.shadowBlur = 12;
+          gCtx.shadowColor = t.color;
+          gCtx.beginPath();
+          gCtx.arc(t.x, t.y, t.radius, 0, Math.PI * 2);
+          gCtx.fill();
+          gCtx.restore();
+
+          // Catch check
+          if (
+            t.y + t.radius >= player.y &&
+            t.y - t.radius <= player.y + player.height &&
+            t.x >= player.x - player.width / 2 &&
+            t.x <= player.x + player.width / 2
+          ) {
+            score += t.points;
+            document.getElementById('score').innerText = score;
+            targets.splice(i, 1);
+            continue;
+          }
+
+          // Miss check
+          if (t.y > gCanvas.height) {
+            lives--;
+            document.getElementById('lives').innerText = lives;
+            targets.splice(i, 1);
+            if (lives <= 0) {
+              gameRunning = false;
+            }
+          }
+        }
+      } else {
+        // Draw overlay instructions
+        gCtx.fillStyle = '#94A3B8';
+        gCtx.font = '20px Outfit, sans-serif';
+        gCtx.textAlign = 'center';
+        if (lives <= 0) {
+          gCtx.fillStyle = '#EF4444';
+          gCtx.fillText('Fim de Jogo! Clique em Reiniciar para tentar novamente.', gCanvas.width / 2, gCanvas.height / 2);
+        } else {
+          gCtx.fillText('Clique em "Iniciar Jogo" e mova o mouse para capturar a energia!', gCanvas.width / 2, gCanvas.height / 2);
+        }
+      }
+
+      requestAnimationFrame(updateGame);
+    }
+
+    updateGame();
+  </script>
+</body>
+</html>
